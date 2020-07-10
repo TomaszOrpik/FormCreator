@@ -14,102 +14,73 @@ export class Form
     render(): Array<Field>
     {
         const row = document.getElementsByClassName('row')[0];
-        row.appendChild(this.renderName());
-        row.appendChild(this.renderSurName());
-        row.appendChild(this.renderMail());
-        row.appendChild(this.renderProfile());
-        row.appendChild(this.renderCheckbox());
-        row.appendChild(this.renderTextArea());
+        this.Fields.forEach((field: Field) => {
+            row.appendChild(this.renderField(field));
+        });
         const btnsDiv = document.createElement('div');
         btnsDiv.style.width = '100%';
         row.appendChild(btnsDiv);
         row.appendChild(this.renderSaveButton());
         row.appendChild(this.renderBackButton());
-
         return this.Fields;
     }
-
-    renderName(): HTMLInputElement {
-        const Name = document.createElement('input');
-        Name.className = 'form-control';
-        Name.id = 'Name';
-        Name.placeholder = 'Imie';
-        Name.style.width = '50%';
-        Name.style.margin = '20px 20px 20px 20px';
-        return Name;
-    }
-
-    renderSurName(): HTMLInputElement {
-        const Surname = document.createElement('input');
-        Surname.className = 'form-control';
-        Surname.id = 'Surname';
-        Surname.placeholder = 'Nazwisko';
-        Surname.style.width = '50%';
-        Surname.style.margin = '20px 20px 20px 20px';
-        return Surname;
-    }
-
-    renderMail(): HTMLInputElement {
-        const Mail = document.createElement('input');
-        Mail.id = 'E-mail';
-        Mail.className = 'form-control';
-        Mail.type = 'email';
-        Mail.placeholder = 'example@example.com';
-        Mail.style.width = '50%';
-        Mail.style.margin = '20px 20px 20px 20px';
-        return Mail;
-    }
-
-    renderProfile(): HTMLSelectElement {
-        const Profile = document.createElement('select');
-        Profile.id = 'Profile';
-        Profile.className = 'form-control';
-        const opt1 = document.createElement('option');
-        opt1.innerHTML = 'Programowanie Aplikacji Webowych';
-        Profile.appendChild(opt1);
-        const opt2 = document.createElement('option');
-        opt2.innerHTML = 'Biznes Inteligence';
-        Profile.appendChild(opt2);
-        const opt3 = document.createElement('option');
-        opt3.innerHTML = 'Zarządzanie Sieciami Komputerowymi';
-        Profile.appendChild(opt3);
-        Profile.style.width = '50%';
-        Profile.style.margin = '20px 20px 20px 20px';
-        return Profile;
-    }
-
-    renderCheckbox(): HTMLDivElement {
-        const Div = document.createElement('div');
-        Div.style.width = '50%';
-        const text = document.createElement('span');
-        text.innerHTML = 'Czy Preferujesz e-learning? ';
-        text.style.paddingLeft = '50%';
-        text.style.fontSize = '20px';
-        Div.appendChild(text);
-        const checkbox = document.createElement('input');
-        checkbox.id = 'Checkbox';
-        checkbox.type = 'checkbox';
-        checkbox.style.marginLeft = '25px';
-        Div.appendChild(checkbox);
-        Div.style.width = '50%';
-        Div.style.margin = '20px 20px 20px 20px';
-        return Div;
-    }
-
-    renderTextArea(): HTMLTextAreaElement {
-        const Text = document.createElement('textarea');
-        Text.id = 'Comments';
-        Text.className = 'form-control';
-        Text.innerHTML = 'Uwagi';
-        Text.style.width = '50%';
-        Text.style.margin = '20px 20px 20px 20px';
-        return Text;
+    //dodać wyświetlanie dla select Boxa if selectValue not null
+    renderField(field: Field): HTMLElement {
+        const div = document.createElement('div');
+        div.style.margin = '20px 20px 20px 20px';
+        div.style.width = '50%';
+        const label = field.Label.getLabel();
+        if (field.Type === 'text' || field.Type === 'email' || field.Type === 'checkbox') {
+            const input = document.createElement('input');
+            input.type = field.Type;
+            input.id = field.Name;
+            input.style.float = 'right';
+            input.className = 'form-control';
+            if (field.Type === 'checkbox') {
+                input.style.width = '20px';
+            }
+            else {
+                input.style.width = '70%';
+            }
+            if (field.Type === 'text' || field.Type === 'email') {
+                input.setAttribute('Value', field.Value);
+            }
+            else {
+                if ( field.Value === 'true') {
+                    (input as HTMLInputElement).checked = true;
+                } else {
+                    (input as HTMLInputElement).checked = false;
+                }
+            }
+            div.appendChild(input);
+        }
+        else if (field.Type === 'select' || 'textarea') {
+            const input = document.createElement(field.Type);
+            input.id = field.Name;
+            input.style.float = 'right';
+            input.className = 'form-control';
+            input.style.width = '70%';
+            if (field.Type === 'select') {
+                field.selectValue.forEach((select: string) => {
+                    const opt = document.createElement('option');
+                    opt.innerHTML = select;
+                    input.appendChild(opt);
+                    });
+                (input as HTMLSelectElement).value = 'Biznes Inteligence';
+            }
+            else if (field.Type === 'textarea') {
+                input.innerHTML = field.Value;
+            }
+            div.appendChild(input);
+        }
+        div.appendChild(label);
+        return div;
     }
 
     renderSaveButton(): HTMLButtonElement {
         const btn = document.createElement('button');
         btn.className = 'btn button';
-        btn.innerHTML = 'SAVE';
+        btn.innerHTML = 'ZAPISZ';
         btn.style.borderWidth = '2px';
         btn.style.borderColor = 'lightskyblue';
         btn.style.margin = '2% 5% 5% 5%';
@@ -121,7 +92,7 @@ export class Form
     renderBackButton(): HTMLButtonElement {
         const btn = document.createElement('button');
         btn.className = 'btn button';
-        btn.innerHTML = 'BACK';
+        btn.innerHTML = 'POWRÓT';
         btn.style.borderWidth = '2px';
         btn.style.borderColor = 'lightskyblue';
         btn.style.margin = '2% 5% 5% 5%';
@@ -132,54 +103,61 @@ export class Form
 
     SaveBtnClick() {
         const Fields: Array<object> = [];
+        const selectBoxValues: string[] = [];
         const Name: HTMLInputElement = document.getElementById('Name') as HTMLInputElement;
         const Surname: HTMLInputElement = document.getElementById('Surname') as HTMLInputElement;
         const Mail: HTMLInputElement = document.getElementById('E-mail') as HTMLInputElement;
         const Profile: HTMLSelectElement = document.getElementById('Profile') as HTMLSelectElement;
         const Checkbox: HTMLInputElement = document.getElementById('Checkbox') as HTMLInputElement;
         const Textarea: HTMLTextAreaElement = document.getElementById('Comments') as HTMLTextAreaElement;
+        // tslint:disable-next-line: prefer-for-of
+        for (let i = 0; i < Profile.children.length; i++) {
+            selectBoxValues.push(Profile.children[i].innerHTML.toString());
+        }
         Fields.push({
             Name: Name.id,
-            Label: 'Imię',
+            Label: Name.parentElement.children[1].textContent,
             Type: Name.type,
-            value: Name.value
+            value: Name.value,
         },
         {
             Name: Surname.id,
-            Label: 'Nazwisko',
+            Label: Surname.parentElement.children[1].textContent,
             Type: Surname.type,
             value: Surname.value
         },
         {
             Name: Mail.id,
-            Label: 'E-mail',
+            Label: Mail.parentElement.children[1].textContent,
             Type: Mail.type,
             value: Mail.value
         },
         {
             Name: Profile.id,
-            Label: 'Kierunek',
+            Label: Profile.parentElement.children[1].textContent,
             Type: Profile.type,
-            value: Profile.value
+            value: Profile.value,
+            selectValues: selectBoxValues
         },
         {
             Name: Checkbox.id,
-            Label: 'Czy preferujesz e-learning?',
+            Label: Checkbox.parentElement.children[1].textContent,
             Type: Checkbox.type,
             value: Checkbox.value
         },
         {
             Name: Textarea.id,
-            Label: 'Uwagi',
+            Label: Textarea.parentElement.children[1].textContent,
             Type: Textarea.type,
             value: Textarea.value
         });
-        console.log(new LocStorage().SaveDocument(Fields));
-        document.location.href = '';
+        const type = 'document - ';
+        new LocStorage().SaveDocument(Fields, type); //dopisać takie samo na koniec formsave
+        window.location.href = '';
     }
 
     BackButtonClick() {
-        document.location.href = '';
+        window.location.href = '';
     }
 }
 

@@ -9,11 +9,12 @@ import { Router } from '@angular/router';
 })
 export class DocumentListComponent implements OnInit {
 
-  constructor() { }
+  constructor(private router: Router) { }
 
   ngOnInit(): void {
     const documentList: DocumentList = new DocumentList();
     documentList.getDocumentList();
+    documentList.initRouter(this.router);
     document.getElementsByClassName('row')[0].appendChild(documentList.render());
   }
 

@@ -1,10 +1,17 @@
 
 export class FieldLabel
 {
-    // constructor(container: HTMLElement, tagStyle: string, content: string) {
-    //     const element = document.createElement('label');
-    //     element.className = tagStyle;
-    //     element.innerHTML = content;
-    // //     container.appendChild(element);
-    // }
+    label: HTMLLabelElement;
+
+    constructor(forInput: string, content: string) {
+        const label = document.createElement('label');
+        label.htmlFor = forInput;
+        label.textContent = content;
+        label.style.float = 'left';
+        this.label = label;
+    }
+
+    getLabel(): HTMLLabelElement {
+        return this.label;
+    }
 }

@@ -6,8 +6,8 @@ export class LocStorage implements DataStorage
     constructor() {
 
     }
-    SaveDocument(object: any): string {
-        const key = Date.now().toString();
+    SaveDocument(object: any, type: string): string {
+        const key = type + Date.now().toString();
         localStorage.setItem(key, JSON.stringify(object));
         return key;
     }
@@ -20,12 +20,16 @@ export class LocStorage implements DataStorage
     GetDocuments(): Array<string> {
         const keys: Array<string> = [];
         for (let i = 0; i < localStorage.length; i++) {
-            if (localStorage.key(i) === 'OTelJS.ClientId') {
-                localStorage.removeItem(localStorage.key(i));
+            if (localStorage.key(i).startsWith('document')) {
+                keys.push(localStorage.key(i));
             }
-            // tslint:disable-next-line: curly
-            else keys.push(localStorage.key(i));
         }
         return keys;
+    }
+    RemoveDocument(id: string) {
+        localStorage.removeItem(id);
+    }
+    GetDocument(id: string): object {
+        return JSON.parse(localStorage.getItem(id));
     }
 }

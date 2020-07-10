@@ -6,9 +6,11 @@ export interface Field
 {
     Name: string;
     Label: FieldLabel;
-    Type: FieldType;
+    //Type: FieldType;
+    Type: string;
     Value: string;
+    selectValue?: Array<string>;
 
-    getValue(): string;
+    getValue(forInputLabel: string, contentLabel: string): void;
 }
 
