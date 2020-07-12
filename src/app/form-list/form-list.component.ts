@@ -1,19 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { DocumentList } from '../Models/DocumentList';
 import { Router } from '@angular/router';
+import { DocumentList } from '../Models/DocumentList';
 
 @Component({
-  selector: 'app-document-list',
-  templateUrl: './document-list.component.html',
-  styleUrls: ['./document-list.component.css']
+  selector: 'app-form-list',
+  templateUrl: './form-list.component.html',
+  styleUrls: ['./form-list.component.css']
 })
-export class DocumentListComponent implements OnInit {
+export class FormListComponent implements OnInit {
 
   constructor(private router: Router) { }
 
   ngOnInit(): void {
     const documentList: DocumentList = new DocumentList();
-    documentList.getDocumentList('document');
+    documentList.getDocumentList('form');
     documentList.initRouter(this.router);
     document.getElementsByClassName('row')[0].appendChild(documentList.render());
   }

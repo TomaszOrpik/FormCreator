@@ -1,5 +1,4 @@
 import { Field } from './Field';
-import { FieldType } from './FieldType';
 import { LocStorage } from './LocStorage';
 
 export class Form
@@ -11,9 +10,14 @@ export class Form
         this.Fields = Fields;
     }
 
-    render(): Array<Field>
+    render(id?: string): Array<Field>
     {
+        let locId = 'id';
+        if (id != null) {
+            locId = id.split(' - ')[1];
+        }
         const row = document.getElementsByClassName('row')[0];
+        row.appendChild(this.renderIdField(locId));
         this.Fields.forEach((field: Field) => {
             row.appendChild(this.renderField(field));
         });
@@ -24,7 +28,23 @@ export class Form
         row.appendChild(this.renderBackButton());
         return this.Fields;
     }
-    //dodać wyświetlanie dla select Boxa if selectValue not null
+
+    renderIdField(locId: string): HTMLElement {
+        const div = document.createElement('div');
+        div.style.margin = '20px 20px 20px 20px';
+        div.style.width = '50%';
+        const label = document.createElement('label');
+        label.innerText = 'Id dokumentu: ';
+        const input = document.createElement('input');
+        input.type = 'Text';
+        input.id = 'documentId';
+        input.style.float = 'right';
+        input.className = 'form-control';
+        input.setAttribute('Value', locId);
+        div.appendChild(label);
+        div.appendChild(input);
+        return div;
+    }
     renderField(field: Field): HTMLElement {
         const div = document.createElement('div');
         div.style.margin = '20px 20px 20px 20px';
@@ -103,56 +123,63 @@ export class Form
 
     SaveBtnClick() {
         const Fields: Array<object> = [];
-        const selectBoxValues: string[] = [];
-        const Name: HTMLInputElement = document.getElementById('Name') as HTMLInputElement;
-        const Surname: HTMLInputElement = document.getElementById('Surname') as HTMLInputElement;
-        const Mail: HTMLInputElement = document.getElementById('E-mail') as HTMLInputElement;
-        const Profile: HTMLSelectElement = document.getElementById('Profile') as HTMLSelectElement;
-        const Checkbox: HTMLInputElement = document.getElementById('Checkbox') as HTMLInputElement;
-        const Textarea: HTMLTextAreaElement = document.getElementById('Comments') as HTMLTextAreaElement;
+        let selectBoxValues: string[] = [];
+
+        const inputIdArray = document.querySelectorAll('input');
+        console.log(inputIdArray);
+        const selectIdArray = document.querySelectorAll('select');
+        console.log(selectIdArray);
+        const textareaIdArray = document.querySelectorAll('textarea');
+        console.log(textareaIdArray);
+
         // tslint:disable-next-line: prefer-for-of
-        for (let i = 0; i < Profile.children.length; i++) {
-            selectBoxValues.push(Profile.children[i].innerHTML.toString());
+        for (let i = 1; i < inputIdArray.length; i++) {
+            const Name: HTMLInputElement = document.getElementById(inputIdArray[i].id) as HTMLInputElement;
+            Fields.push({
+                Name: Name.id,
+                Label: Name.parentElement.children[1].textContent,
+                Type: Name.type,
+                value: Name.value,
+            });
         }
-        Fields.push({
-            Name: Name.id,
-            Label: Name.parentElement.children[1].textContent,
-            Type: Name.type,
-            value: Name.value,
-        },
-        {
-            Name: Surname.id,
-            Label: Surname.parentElement.children[1].textContent,
-            Type: Surname.type,
-            value: Surname.value
-        },
-        {
-            Name: Mail.id,
-            Label: Mail.parentElement.children[1].textContent,
-            Type: Mail.type,
-            value: Mail.value
-        },
-        {
-            Name: Profile.id,
-            Label: Profile.parentElement.children[1].textContent,
-            Type: Profile.type,
-            value: Profile.value,
-            selectValues: selectBoxValues
-        },
-        {
-            Name: Checkbox.id,
-            Label: Checkbox.parentElement.children[1].textContent,
-            Type: Checkbox.type,
-            value: Checkbox.value
-        },
-        {
-            Name: Textarea.id,
-            Label: Textarea.parentElement.children[1].textContent,
-            Type: Textarea.type,
-            value: Textarea.value
-        });
+
+        // tslint:disable-next-line: prefer-for-of
+        for (let i = 1; i < selectIdArray.length; i++) {
+            const Select: HTMLSelectElement = document.getElementById(selectIdArray[i].id) as HTMLSelectElement;
+            let profileType: string;
+            if (Select.type === 'select-one') {
+                profileType = 'select';
+            }
+            else {
+                profileType = Select.type;
+            }
+            // tslint:disable-next-line: prefer-for-of
+            for (let j = 1; j < Select.children.length; j++) {
+                selectBoxValues.push(Select.children[j].innerHTML.toString());
+            }
+            Fields.push({
+                Name: Select.id,
+                Label: Select.parentElement.children[1].textContent,
+                Type: profileType,
+                value: Select.value,
+                selectValues: selectBoxValues
+            });
+            selectBoxValues = [];
+        }
+
+        // tslint:disable-next-line: prefer-for-of
+        for (let i = 0; i < textareaIdArray.length; i++) {
+            const Textarea: HTMLTextAreaElement = document.getElementById(textareaIdArray[i].id) as HTMLTextAreaElement;
+            Fields.push({
+                Name: Textarea.id,
+                Label: Textarea.parentElement.children[1].textContent,
+                Type: Textarea.type,
+                value: Textarea.value
+            });
+        }
+        const id = (document.getElementById('documentId') as HTMLInputElement).value;
         const type = 'document - ';
-        new LocStorage().SaveDocument(Fields, type); //dopisać takie samo na koniec formsave
+        new LocStorage().SaveDocument(Fields, type, id);
         window.location.href = '';
     }
 

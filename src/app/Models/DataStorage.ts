@@ -4,5 +4,5 @@ export interface DataStorage
 {
     SaveDocument(object: any, type: string): string;
     LoadDocument(key: string): Form;
-    GetDocuments(): Array<string>;
+    GetDocuments(type: string): Array<string>;
 }

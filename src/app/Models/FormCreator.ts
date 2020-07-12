@@ -1,6 +1,5 @@
 import { Field } from './Field';
-import { Form } from './Form';
-import { FieldLabel } from './FieldLabel';
+import { LocStorage } from './LocStorage';
 
 export class FormCreator {
 
@@ -30,6 +29,15 @@ export class FormCreator {
             }
         });
         row.appendChild(btn);
+        const btn2 = document.createElement('button');
+        btn2.className = 'btn button';
+        btn2.textContent = 'Zapisz Formularz';
+        btn2.style.borderWidth = '2px';
+        btn2.style.borderColor = 'lightskyblue';
+        btn2.style.margin = '20px 20px 20px 20px';
+        btn2.style.width = '200px';
+        btn2.addEventListener('click', this.saveForm);
+        row.appendChild(btn2);
     }
 
     generateList(large: boolean): HTMLTableElement {
@@ -105,6 +113,12 @@ export class FormCreator {
                 window.alert('Uzupełnij wszystkie pola przed zapisem!');
                 return;
             }
+            if (localType.value === 'checkbox') {
+                if (localValue !== 'true' && localValue !== 'false') {
+                    window.alert('Checkbox może mieć jedynie wartości true i false');
+                    return;
+                }
+            }
             const tbody = document.getElementById('BigTable');
             const tr = document.createElement('tr');
             const tName = document.createElement('td');
@@ -144,7 +158,7 @@ export class FormCreator {
         return div;
     }
 
-    renderInput(name: string): HTMLDivElement { // tutaj tabelka z selectbox optionami
+    renderInput(name: string): HTMLDivElement {
         const selectList: Array<string> = [];
         const div = document.createElement('div');
         div.style.margin = '20px 20px 20px 20px';
@@ -220,10 +234,52 @@ export class FormCreator {
         return option;
     }
 
-
-    //wpierw dodać zapisywanie selectów do localStorage w form
-    // save form to local storage
     saveForm() {
-        //zbiera dane z tabel w htmlu i zapisuje na localStorage
+        const Fields: Array<object> = [];
+        const table = document.getElementById('BigTable');
+        if (table.children.length > 1) {
+            for (let i = 1; i < table.children.length; i++) {
+                const row = table.children[i];
+                const Name: string = row.children[0].innerHTML;
+                const Label: string = row.children[1].innerHTML;
+                const Type: string = row.children[2].innerHTML;
+                const value: string = row.children[3].innerHTML;
+
+                if (Type === 'select') {
+                    const selectValues: string[] = [];
+                    const SelectContainer = row.children[4].children[0];
+                   // tslint:disable-next-line: prefer-for-of
+                    for (let j = 0; j < SelectContainer.children.length; j++) {
+                        selectValues.push(SelectContainer.children[j].textContent);
+                   };
+                    Fields.push({
+                    Name,
+                    Label,
+                    Type,
+                    value,
+                    selectValues
+                });
+                }
+                else {
+                    Fields.push({
+                    Name,
+                    Label,
+                    Type,
+                    value
+                    });
+                }
+                }
+            }
+        else {
+            window.alert('Nie dodano pola');
+        }
+        const type = 'form - ';
+        new LocStorage().SaveDocument(Fields, type);
+
+        const bTable = document.getElementById('BigTable');
+        for (const i = 1; i < bTable.children.length;) {
+            const row = bTable.children[i];
+            row.remove();
+        }
     }
 }
